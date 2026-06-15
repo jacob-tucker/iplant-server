@@ -1,0 +1,14 @@
+{
+  "name": "iplant-server",
+  "version": "0.1.0",
+  "description": "Server that ingests readings from a plant-reader hardware device over HTTP/JSON.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
