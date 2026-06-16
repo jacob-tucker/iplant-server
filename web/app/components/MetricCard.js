@@ -11,6 +11,11 @@ export default function MetricCard({ metric, value }) {
   const happy = inGoodRange(metric, value);
   const status = statusFor(metric, value);
 
+  // Easter egg: a very wet fern gets a special note under the soil card.
+  if (metric.key === "soil_moisture" && value != null && value > 90) {
+    status.text = "Riley and Bella squirt off";
+  }
+
   // Map the good range onto the 0..100% track.
   const span = metric.max - metric.min;
   const bandLeft = ((metric.good[0] - metric.min) / span) * 100;
