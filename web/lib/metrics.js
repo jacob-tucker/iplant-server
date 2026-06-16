@@ -1,50 +1,65 @@
-// Display config for each sensor field the device sends.
-// `min`/`max` define the gauge's full sweep; `good` is the happy range we
-// highlight. Keep keys in sync with the device's JSON field names.
+// Care thresholds tuned for a fern (Boston fern as the reference plant):
+//   • Temperature 18–24°C  (65–75°F daytime)
+//   • Humidity    50–80%   (ferns love it damp; higher is better)
+//   • Light       5k–10k lux of *bright indirect* light (direct sun scorches)
+//   • Pressure    not a plant need — just shown as calm/unsettled ambient air
+// `min`/`max` set each meter's full sweep; `good` is the fern's happy band.
 export const METRICS = [
   {
     key: "temperature",
     label: "Temperature",
-    emoji: "🌡️",
+    icon: "thermometer",
     unit: "°C",
     min: 5,
     max: 35,
-    good: [18, 26],
-    color: "#ff9a76",
+    good: [18, 24],
+    color: "var(--warm)",
+    happy: "just right",
+    low: "a little cool",
+    high: "too toasty",
   },
   {
     key: "humidity",
     label: "Humidity",
-    emoji: "💧",
+    icon: "droplet",
     unit: "%",
     min: 0,
     max: 100,
     good: [50, 80],
-    color: "#5bb6e0",
-  },
-  {
-    key: "pressure",
-    label: "Pressure",
-    emoji: "🌬️",
-    unit: "hPa",
-    min: 980,
-    max: 1020,
-    good: [995, 1015],
-    color: "#b69cf0",
+    color: "var(--aqua)",
+    happy: "perfectly dewy",
+    low: "a bit dry",
+    high: "very steamy",
   },
   {
     key: "light",
     label: "Light",
-    emoji: "☀️",
+    icon: "sun",
     unit: "lux",
     min: 0,
-    max: 1200,
-    good: [200, 900],
-    color: "#f4c95d",
+    max: 12000,
+    good: [5000, 10000],
+    color: "var(--honey)",
+    happy: "lovely and bright",
+    low: "on the dim side",
+    high: "a touch harsh",
+  },
+  {
+    key: "pressure",
+    label: "Air pressure",
+    icon: "gauge",
+    unit: "hPa",
+    min: 980,
+    max: 1040,
+    good: [1005, 1025],
+    color: "var(--lilac)",
+    happy: "calm skies",
+    low: "unsettled air",
+    high: "heavy air",
   },
 ];
 
-// Fraction (0..1) of where `value` sits within the gauge's [min, max] sweep.
+// Fraction (0..1) of where `value` sits within the meter's [min, max] sweep.
 export function fraction(metric, value) {
   if (value == null || Number.isNaN(value)) return 0;
   const f = (value - metric.min) / (metric.max - metric.min);
@@ -56,15 +71,23 @@ export function inGoodRange(metric, value) {
   return value >= metric.good[0] && value <= metric.good[1];
 }
 
-// Pick the plant's overall mood from the latest reading.
-export function plantMood(data) {
-  if (!data) return { emoji: "🌱", label: "waiting for the first reading…" };
+// Friendly one-liner for a single metric, plus a tone for styling.
+export function statusFor(metric, value) {
+  if (value == null || Number.isNaN(value)) return { text: "waiting", tone: "idle" };
+  if (value < metric.good[0]) return { text: metric.low, tone: "low" };
+  if (value > metric.good[1]) return { text: metric.high, tone: "high" };
+  return { text: metric.happy, tone: "good" };
+}
 
+// The fern's overall mood, picked from the latest reading. Drives both the
+// drawing's expression and the little speech bubble.
+export function fernMood(data) {
+  if (!data) return { key: "idle", line: "waiting to hear from the sensor…" };
   const { temperature: t, humidity: h, light: l } = data;
-  if (h != null && h < 45) return { emoji: "🥀", label: "a little thirsty" };
-  if (t != null && t > 29) return { emoji: "🥵", label: "feeling too warm" };
-  if (t != null && t < 12) return { emoji: "🥶", label: "a bit chilly" };
-  if (l != null && l < 5) return { emoji: "🌙", label: "resting in the dark" };
-  if (h != null && h > 88) return { emoji: "💦", label: "very dewy" };
-  return { emoji: "🌿", label: "happy & thriving" };
+  if (h != null && h < 45) return { key: "thirsty", line: "I'm getting a little thirsty." };
+  if (t != null && t > 27) return { key: "hot", line: "Phew, it's toasty in here!" };
+  if (t != null && t < 13) return { key: "cold", line: "Brr — a touch chilly." };
+  if (l != null && l < 1500) return { key: "dim", line: "It's cozy and dim right now." };
+  if (h != null && h > 88) return { key: "lush", line: "So dewy. I love it." };
+  return { key: "happy", line: "I'm feeling lovely today." };
 }

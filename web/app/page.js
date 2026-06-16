@@ -3,26 +3,33 @@
 import { useEffect, useRef, useState } from "react";
 import { API_BASE } from "@/lib/api";
 import { METRICS } from "@/lib/metrics";
-import Gauge from "./components/Gauge";
-import Plant from "./components/Plant";
+import Fern from "./components/Fern";
+import MetricCard from "./components/MetricCard";
 import LiveFeed from "./components/LiveFeed";
+import Sky from "./components/Sky";
 
-const MAX_FEED = 30;
+const MAX_FEED = 24;
+
+const CONNECTION_COPY = {
+  connecting: "saying hello…",
+  live: "live",
+  offline: "asleep",
+};
 
 export default function Home() {
   const [readings, setReadings] = useState([]);
-  const [status, setStatus] = useState("connecting"); // connecting | live | offline
+  const [status, setStatus] = useState("connecting");
   const [pulse, setPulse] = useState(false);
   const pulseTimer = useRef(null);
 
-  // Briefly trigger the plant bounce whenever a new reading arrives.
+  // Briefly perk the fern up whenever a fresh reading lands.
   function triggerPulse() {
     setPulse(true);
     clearTimeout(pulseTimer.current);
-    pulseTimer.current = setTimeout(() => setPulse(false), 600);
+    pulseTimer.current = setTimeout(() => setPulse(false), 700);
   }
 
-  // 1) Load the recent readings for an instant-populated dashboard.
+  // Load recent readings so the page is populated immediately.
   useEffect(() => {
     let cancelled = false;
     fetch(`${API_BASE}/api/readings?limit=${MAX_FEED}`)
@@ -36,10 +43,9 @@ export default function Home() {
     };
   }, []);
 
-  // 2) Subscribe to the live stream. EventSource auto-reconnects on drop.
+  // Subscribe to the live stream (EventSource auto-reconnects if dropped).
   useEffect(() => {
     const es = new EventSource(`${API_BASE}/api/stream`);
-
     es.onopen = () => setStatus("live");
     es.onerror = () => setStatus("offline");
     es.onmessage = (e) => {
@@ -52,43 +58,45 @@ export default function Home() {
         // ignore heartbeats / malformed frames
       }
     };
-
     return () => es.close();
   }, []);
 
   const latest = readings[0] || null;
 
   return (
-    <main className="garden">
-      <header className="garden-header">
-        <h1 className="garden-title">🌿 My Little Garden</h1>
-        <span className={`status-pill status-${status}`}>
-          <span className="status-dot" />
-          {status === "live" ? "live" : status === "connecting" ? "connecting…" : "offline"}
+    <main className="page">
+      <Sky />
+
+      <header className="topbar">
+        <div className="brand">
+          <span className="brand-mark" />
+          <span className="brand-name">Fernie</span>
+        </div>
+        <span className={`pulse pulse-${status}`}>
+          <span className="firefly" />
+          {CONNECTION_COPY[status]}
         </span>
       </header>
 
-      <section className="hero">
-        <Plant latest={latest} pulse={pulse} />
+      <section className="stage">
+        <Fern latest={latest} pulse={pulse} />
         {latest && (
-          <p className="hero-stamp">
-            last reading {new Date(latest.receivedAt).toLocaleTimeString()}
+          <p className="stage-stamp">
+            checked in at {new Date(latest.receivedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
           </p>
         )}
       </section>
 
-      <section className="gauges">
+      <section className="cards">
         {METRICS.map((m) => (
-          <Gauge key={m.key} metric={m} value={latest?.data?.[m.key]} />
+          <MetricCard key={m.key} metric={m} value={latest?.data?.[m.key]} />
         ))}
       </section>
 
-      <section className="feed-section">
-        <LiveFeed readings={readings} />
-      </section>
+      <LiveFeed readings={readings} />
 
-      <footer className="garden-footer">
-        listening to <code>{API_BASE}</code>
+      <footer className="footer">
+        <span>tending to a fern, one reading at a time</span>
       </footer>
     </main>
   );

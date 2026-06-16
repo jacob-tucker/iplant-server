@@ -11,11 +11,12 @@ const INTERVAL_MS = Number(process.env.INTERVAL_MS) || 3000;
 const DEVICE_ID = process.env.DEVICE_ID || "plant_01";
 
 // Mutable baseline that we nudge each tick for a natural-looking wander.
+// Baselines sit inside a fern's happy ranges so the demo shows a content plant.
 const state = {
-  temperature: 19.8,
-  humidity: 73,
-  pressure: 990.9,
-  light: 12,
+  temperature: 21,
+  humidity: 66,
+  pressure: 1013,
+  light: 7200,
 };
 
 // Random walk: nudge `value` by up to ±`step`, clamped to [min, max].
@@ -31,15 +32,15 @@ function round(n, places = 2) {
 async function tick() {
   state.temperature = drift(state.temperature, 0.15, 15, 30);
   state.humidity = drift(state.humidity, 0.6, 40, 95);
-  state.pressure = drift(state.pressure, 0.1, 985, 1005);
-  state.light = drift(state.light, 8, 0, 1200);
+  state.pressure = drift(state.pressure, 0.2, 995, 1032);
+  state.light = drift(state.light, 220, 1000, 11500);
 
   const reading = {
     device_id: DEVICE_ID,
     temperature: round(state.temperature),
     humidity: round(state.humidity),
     pressure: round(state.pressure),
-    light: round(state.light),
+    light: round(state.light, 0),
   };
 
   try {
