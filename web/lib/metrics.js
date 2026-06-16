@@ -86,9 +86,9 @@ export function fernMood(data) {
   const { temperature: t, humidity: h, light: l, soil_moisture: s } = data;
   if (s != null && s < 35) return { key: "thirsty", line: "My soil's getting dry." };
   if (h != null && h < 45) return { key: "thirsty", line: "The air's a little dry." };
+  if (s != null && s > 90) return { key: "lush", line: "Riley and Bella squirt off" };
   if (t != null && t > 27) return { key: "hot", line: "Phew, it's toasty in here!" };
   if (t != null && t < 13) return { key: "cold", line: "Brr — a touch chilly." };
   if (l != null && l < 1500) return { key: "dim", line: "It's cozy and dim right now." };
-  if (s != null && s > 92) return { key: "lush", line: "My roots are happily soaked." };
   return { key: "happy", line: "I'm feeling lovely today." };
 }
