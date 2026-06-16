@@ -1,9 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { METRICS } from "@/lib/metrics";
 
-function timeAgo(iso) {
-  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+function timeAgo(iso, now) {
+  const secs = Math.max(0, Math.floor((now - new Date(iso).getTime()) / 1000));
   if (secs < 5) return "just now";
   if (secs < 60) return `${secs}s ago`;
   const mins = Math.floor(secs / 60);
@@ -14,6 +15,13 @@ function timeAgo(iso) {
 // A tidy log of recent readings, newest on top. The freshest row gets a soft
 // highlight and slides in.
 export default function LiveFeed({ readings }) {
+  // Tick once a second so the relative "Xs ago" labels count up live.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <section className="feed">
       <h2 className="feed-title">Recent notes</h2>
@@ -26,7 +34,7 @@ export default function LiveFeed({ readings }) {
             <li key={r.id || r.receivedAt} className={`feed-row ${i === 0 ? "is-new" : ""}`}>
               <div className="feed-row-top">
                 <span className="feed-device">{r.data?.device_id || "sensor"}</span>
-                <span className="feed-time">{timeAgo(r.receivedAt)}</span>
+                <span className="feed-time">{timeAgo(r.receivedAt, now)}</span>
               </div>
               <div className="feed-chips">
                 {METRICS.map((m) => {
