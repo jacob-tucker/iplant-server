@@ -16,6 +16,18 @@ const CONNECTION_COPY = {
   offline: "asleep",
 };
 
+// Is it night in the US Eastern time zone right now? Night = 7pm–6am ET.
+function isNightInEastern() {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      hour: "numeric",
+      hour12: false,
+    }).format(new Date())
+  );
+  return hour >= 19 || hour < 6;
+}
+
 export default function Home() {
   const [readings, setReadings] = useState([]);
   const [status, setStatus] = useState("connecting");
@@ -40,6 +52,17 @@ export default function Home() {
       .catch(() => {});
     return () => {
       cancelled = true;
+    };
+  }, []);
+
+  // Switch to the night theme after dark in Eastern time; re-check each minute.
+  useEffect(() => {
+    const apply = () => document.documentElement.classList.toggle("night", isNightInEastern());
+    apply();
+    const id = setInterval(apply, 60000);
+    return () => {
+      clearInterval(id);
+      document.documentElement.classList.remove("night");
     };
   }, []);
 

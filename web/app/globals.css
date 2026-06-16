@@ -10,16 +10,41 @@
   --pot-deep: #b56b44;
   --soil: #5c4636;
   --good: #6ea860;
+  --track: #eee7d6;
 
   /* metric accents */
   --warm: #df8a5c;
   --aqua: #4fa3ad;
   --honey: #e0ac46;
-  --lilac: #9588c2;
+  --soilm: #5b86b5;
 
   /* fern frond colour, overridden per mood below */
   --frond: #6f9c5b;
   --frond-deep: #4f7a3f;
+}
+
+/* ----------------------------------------------------------------- night */
+html.night {
+  --cream: #1b2730;
+  --cream-deep: #16212a;
+  --paper: #243038;
+  --ink: #e9efe3;
+  --muted: #94a394;
+  --sage: #8cc06a;
+  --sage-deep: #a7d588;
+  --pot: #b06f4a;
+  --pot-deep: #97593a;
+  --soil: #463529;
+  --good: #7fc06d;
+  --track: #33424c;
+
+  --warm: #ec9b6c;
+  --aqua: #6bc0c9;
+  --honey: #f0c45f;
+  --soilm: #7ba6d6;
+}
+html.night body {
+  background: radial-gradient(120% 90% at 50% -10%, #2b3a44 0%, #1a242d 48%, #111922 100%);
 }
 
 * {
@@ -77,6 +102,71 @@ body {
   opacity: 0;
   animation: rise var(--dur) linear infinite;
   animation-delay: var(--delay);
+}
+
+/* moon + stars: hidden by day, shown at night */
+.moon {
+  position: absolute;
+  top: -50px;
+  right: -30px;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  display: none;
+  background: radial-gradient(circle at 38% 38%, #fdf6dc, #e9e0bf 60%, #d9cfa9 100%);
+  box-shadow: 0 0 70px 24px rgba(247, 240, 200, 0.22);
+}
+.moon::before,
+.moon::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(180, 170, 135, 0.35);
+}
+.moon::before {
+  width: 26px;
+  height: 26px;
+  top: 46px;
+  left: 40px;
+}
+.moon::after {
+  width: 16px;
+  height: 16px;
+  top: 96px;
+  left: 92px;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fdf6dc;
+  display: none;
+  opacity: 0.85;
+  box-shadow: 0 0 6px 1px rgba(253, 246, 220, 0.7);
+  animation: twinkle var(--dur) ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+html.night .sun {
+  display: none;
+}
+html.night .moon,
+html.night .star {
+  display: block;
+}
+html.night .mote {
+  background: radial-gradient(circle at 30% 30%, #fff7d8, rgba(240, 196, 83, 0.5));
 }
 
 @keyframes rise {
@@ -386,7 +476,7 @@ body {
   position: relative;
   height: 10px;
   border-radius: 999px;
-  background: #eee7d6;
+  background: var(--track);
   overflow: visible;
 }
 .meter-band {

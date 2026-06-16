@@ -1,8 +1,8 @@
 // Care thresholds tuned for a fern (Boston fern as the reference plant):
-//   • Temperature 18–24°C  (65–75°F daytime)
-//   • Humidity    50–80%   (ferns love it damp; higher is better)
-//   • Light       5k–10k lux of *bright indirect* light (direct sun scorches)
-//   • Pressure    not a plant need — just shown as calm/unsettled ambient air
+//   • Temperature   18–24°C  (65–75°F daytime)
+//   • Humidity      50–80%   (ferns love it damp; higher is better)
+//   • Light         5k–10k lux of *bright indirect* light (direct sun scorches)
+//   • Soil moisture 50–85%   (keep the soil consistently moist, never soggy)
 // `min`/`max` set each meter's full sweep; `good` is the fern's happy band.
 export const METRICS = [
   {
@@ -45,17 +45,17 @@ export const METRICS = [
     high: "a touch harsh",
   },
   {
-    key: "pressure",
-    label: "Air pressure",
-    icon: "gauge",
-    unit: "hPa",
-    min: 980,
-    max: 1040,
-    good: [1005, 1025],
-    color: "var(--lilac)",
-    happy: "calm skies",
-    low: "unsettled air",
-    high: "heavy air",
+    key: "soil_moisture",
+    label: "Soil moisture",
+    icon: "sprout",
+    unit: "%",
+    min: 0,
+    max: 100,
+    good: [50, 85],
+    color: "var(--soilm)",
+    happy: "nicely moist",
+    low: "getting dry",
+    high: "a bit soggy",
   },
 ];
 
@@ -83,11 +83,12 @@ export function statusFor(metric, value) {
 // drawing's expression and the little speech bubble.
 export function fernMood(data) {
   if (!data) return { key: "idle", line: "waiting to hear from the sensor…" };
-  const { temperature: t, humidity: h, light: l } = data;
-  if (h != null && h < 45) return { key: "thirsty", line: "I'm getting a little thirsty." };
+  const { temperature: t, humidity: h, light: l, soil_moisture: s } = data;
+  if (s != null && s < 35) return { key: "thirsty", line: "My soil's getting dry." };
+  if (h != null && h < 45) return { key: "thirsty", line: "The air's a little dry." };
   if (t != null && t > 27) return { key: "hot", line: "Phew, it's toasty in here!" };
   if (t != null && t < 13) return { key: "cold", line: "Brr — a touch chilly." };
   if (l != null && l < 1500) return { key: "dim", line: "It's cozy and dim right now." };
-  if (h != null && h > 88) return { key: "lush", line: "So dewy. I love it." };
+  if (s != null && s > 92) return { key: "lush", line: "My roots are happily soaked." };
   return { key: "happy", line: "I'm feeling lovely today." };
 }

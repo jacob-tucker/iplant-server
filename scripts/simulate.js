@@ -15,8 +15,8 @@ const DEVICE_ID = process.env.DEVICE_ID || "plant_01";
 const state = {
   temperature: 21,
   humidity: 66,
-  pressure: 1013,
   light: 7200,
+  soil_moisture: 68,
 };
 
 // Random walk: nudge `value` by up to ±`step`, clamped to [min, max].
@@ -32,15 +32,15 @@ function round(n, places = 2) {
 async function tick() {
   state.temperature = drift(state.temperature, 0.15, 15, 30);
   state.humidity = drift(state.humidity, 0.6, 40, 95);
-  state.pressure = drift(state.pressure, 0.2, 995, 1032);
   state.light = drift(state.light, 220, 1000, 11500);
+  state.soil_moisture = drift(state.soil_moisture, 1.2, 20, 100);
 
   const reading = {
     device_id: DEVICE_ID,
     temperature: round(state.temperature),
     humidity: round(state.humidity),
-    pressure: round(state.pressure),
     light: round(state.light, 0),
+    soil_moisture: round(state.soil_moisture, 0),
   };
 
   try {
